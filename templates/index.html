@@ -1,0 +1,319 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Extractor & Sender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .sent {
+            color: green;
+            font-weight: bold;
+        }
+        .failed {
+            color: red;
+            font-weight: bold;
+        }
+        #progress {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function updateProgress(status) {
+            document.getElementById("progress").innerText = status;
+        }
+    </script>
+</head>
+<body>
+    <h2>Email Extractor & Sender</h2>
+
+    <form action="/" method="post" enctype="multipart/form-data" onsubmit="updateProgress('Uploading file and extracting emails...')">
+        <label for="email_file">Upload Email File:</label>
+        <input type="file" name="file" id="email_file" required>
+        <br><br>
+        <label for="resume_file">Upload Resume:</label>
+        <input type="file" name="resume" id="resume_file" required>
+        <br><br>
+        <button type="submit">Upload Files & Send Emails</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('download_file') }}" style="display: {% if email_status_list %}block{% else %}none{% endif %};">
+        <button>Download Email Status CSV</button>
+    </a>
+
+    <p id="progress"></p>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if email_status_list %}
+    <h3>Processing Status</h3>
+    <table>
+        <tr>
+            <th>S.No</th>
+            <th>Email</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Date & Time</th>
+        </tr>
+        {% for item in email_status_list %}
+        <tr>
+            <td>{{ item.sno }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.body }}</td>
+            <td class="{% if item.status == 'Sent' %}sent{% else %}failed{% endif %}">
+                {{ item.status }}
+            </td>
+            <td>{{ item.date_time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Extractor & Sender</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      color: #333;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    /* Navigation Bar */
+    .navbar {
+      background-color: #343a40;
+      padding: 15px 20px;
+      color: #fff;
+    }
+    .navbar h1 {
+      margin: 0;
+      font-size: 24px;
+      display: inline-block;
+    }
+    .navbar ul {
+      list-style: none;
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+      float: right;
+    }
+    .navbar ul li {
+      display: inline;
+      margin-left: 20px;
+    }
+    .navbar ul li a {
+      color: #fff;
+      font-size: 16px;
+    }
+    /* Main Container */
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    /* Form Styles */
+    form {
+      margin-bottom: 20px;
+    }
+    form label {
+      font-weight: bold;
+    }
+    form input[type="file"] {
+      margin: 10px 0;
+      display: block;
+    }
+    form button {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #0056b3;
+    }
+    /* Progress Message */
+    #progress {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    /* Flash Messages */
+    .flash-messages ul {
+      list-style: none;
+      padding: 0;
+    }
+    .flash-messages li {
+      background: #ffecb3;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-left: 5px solid #ffc107;
+    }
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    table th {
+      background-color: #007bff;
+      color: #fff;
+    }
+    table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+    .sent {
+      color: green;
+      font-weight: bold;
+    }
+    .failed {
+      color: red;
+      font-weight: bold;
+    }
+    /* Download Button */
+    .download-btn button {
+      background-color: #28a745;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .download-btn button:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+  <script>
+    function updateProgress(status) {
+      document.getElementById("progress").innerText = status;
+    }
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <h1>Email Extractor & Sender</h1>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+  
+  <!-- Main Container -->
+  <div class="container">
+    <h2>Upload Files</h2>
+    <form action="/" method="post" enctype="multipart/form-data" onsubmit="updateProgress('Uploading file and extracting emails...')">
+      <label for="email_file">Upload Email File:</label>
+      <input type="file" name="file" id="email_file" required>
+      <br>
+      <label for="resume_file">Upload Resume:</label>
+      <input type="file" name="resume" id="resume_file" required>
+      <br>
+      <button type="submit">Upload Files & Send Emails</button>
+    </form>
+    
+    <div id="progress"></div>
+    
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+    </div>
+    
+    {% if email_status_list %}
+      <h3>Processing Status</h3>
+      <table>
+        <tr>
+          <th>S.No</th>
+          <th>Email</th>
+          <th>Message</th>
+          <th>Status</th>
+          <th>Date & Time</th>
+        </tr>
+        {% for item in email_status_list %}
+        <tr>
+          <td>{{ item.sno }}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.body }}</td>
+          <td class="{% if item.status == 'Sent' %}sent{% else %}failed{% endif %}">{{ item.status }}</td>
+          <td>{{ item.date_time }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+    
+    <div class="download-btn" style="margin-top:20px;">
+      <a href="{{ url_for('download_file') }}" style="display: {% if email_status_list %}block{% else %}none{% endif %};">
+        <button>Download Email Status CSV</button>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
